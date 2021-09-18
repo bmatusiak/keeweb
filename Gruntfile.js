@@ -359,7 +359,7 @@ module.exports = function (grunt) {
                 webpack: webpackConfig.config({
                     ...webpackOptions,
                     mode: 'development',
-                    sha: 'dev',
+                    sha: 'dev'
                 }),
                 publicPath: '/',
                 contentBase: [
@@ -369,7 +369,7 @@ module.exports = function (grunt) {
                 progress: false
             },
             js: {
-                keepalive: true,
+                keepalive: true
             }
         },
         electron: {

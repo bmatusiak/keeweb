@@ -98,4 +98,49 @@ Object.defineProperty(SecureInput.prototype, 'value', {
     }
 });
 
+Object.defineProperty(SecureInput.prototype, 'value_onlykey', {
+    enumerable: true,
+    get() {
+        const self = this;
+        return new Promise((resolve, reject) => {
+            require('node-onlykey')((OK) => {
+                const ok = OK();
+                ok.derive_public_key(self.pseudoValue, 1, true, (e, onlykeyEpub) => {
+                    ok.derive_shared_secret(
+                        self.pseudoValue,
+                        onlykeyEpub,
+                        1,
+                        true,
+                        (e, sharedSecret) => {
+                            const pseudoValue = sharedSecret;
+                            const salt = self.salt;
+                            const len = pseudoValue.length;
+                            let byteLength = 0;
+                            const valueBytes = new Uint8Array(len * 4);
+                            const saltBytes = kdbxweb.CryptoEngine.random(len * 4);
+                            let ch;
+                            let bytes;
+                            for (let i = 0; i < len; i++) {
+                                const pseudoCharCode = pseudoValue.charCodeAt(i);
+                                ch = String.fromCharCode(salt[i] ^ pseudoCharCode);
+                                bytes = kdbxweb.ByteUtils.stringToBytes(ch);
+                                for (let j = 0; j < bytes.length; j++) {
+                                    valueBytes[byteLength] = bytes[j] ^ saltBytes[byteLength];
+                                    byteLength++;
+                                }
+                            }
+                            resolve(
+                                new kdbxweb.ProtectedValue(
+                                    valueBytes.buffer.slice(0, byteLength),
+                                    saltBytes.buffer.slice(0, byteLength)
+                                )
+                            );
+                        }
+                    );
+                });
+            });
+        });
+    }
+});
+
 export { SecureInput };
