@@ -353,10 +353,13 @@ module.exports = function (grunt) {
         },
         'webpack-dev-server': {
             options: {
+                host: '0.0.0.0',
+                disableHostCheck: true,
+                port: 8080,
                 webpack: webpackConfig.config({
                     ...webpackOptions,
                     mode: 'development',
-                    sha: 'dev'
+                    sha: 'dev',
                 }),
                 publicPath: '/',
                 contentBase: [
@@ -367,7 +370,6 @@ module.exports = function (grunt) {
             },
             js: {
                 keepalive: true,
-                port: 8085
             }
         },
         electron: {
